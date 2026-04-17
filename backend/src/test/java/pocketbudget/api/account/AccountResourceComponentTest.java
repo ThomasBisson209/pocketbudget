@@ -1,6 +1,7 @@
 package pocketbudget.api.account;
 
 import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -12,7 +13,9 @@ import pocketbudget.api.exceptions.mappers.AccountNotFoundExceptionMapper;
 import pocketbudget.application.account.AccountAssembler;
 import pocketbudget.application.account.AccountService;
 import pocketbudget.domain.account.AccountRepository;
+import pocketbudget.domain.transaction.TransactionRepository;
 import pocketbudget.infra.persistence.inMemory.InMemoryAccountRepository;
+import pocketbudget.infra.persistence.inMemory.InMemoryTransactionRepository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,10 +24,13 @@ class AccountResourceComponentTest extends JerseyTest {
     @Override
     protected Application configure() {
         ResourceConfig config = new ResourceConfig(AccountResource.class, AccountNotFoundExceptionMapper.class);
+        // Inject a test username so AccountResource.userId() returns a non-null value
+        config.register((ContainerRequestFilter) ctx -> ctx.setProperty("username", "testUser"));
         config.register(new AbstractBinder() {
             @Override
             protected void configure() {
                 bind(new InMemoryAccountRepository()).to(AccountRepository.class);
+                bind(new InMemoryTransactionRepository()).to(TransactionRepository.class);
                 bindAsContract(AccountAssembler.class);
                 bindAsContract(AccountService.class);
             }

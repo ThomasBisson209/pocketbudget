@@ -25,7 +25,7 @@ public class Budget {
     @Column(nullable = false)
     private int year;
 
-    @Column(nullable = false)
+    @Column(name = "user_id")
     private String userId;
 
     protected Budget() {}

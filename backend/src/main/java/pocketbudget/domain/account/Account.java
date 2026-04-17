@@ -19,7 +19,7 @@ public class Account {
     @Column(nullable = false)
     private double balance;
 
-    @Column(nullable = false)
+    @Column(name = "user_id")
     private String userId;
 
     protected Account() {}

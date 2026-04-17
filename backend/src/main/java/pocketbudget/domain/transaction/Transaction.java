@@ -12,7 +12,7 @@ public class Transaction {
     @Column(nullable = false)
     private String accountId;
 
-    @Column(nullable = false)
+    @Column(name = "user_id")
     private String userId;
 
     @Column
