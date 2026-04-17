@@ -64,7 +64,7 @@ export function AccountList() {
           <h1 className="text-2xl font-bold text-gray-900">Comptes</h1>
           <p className="text-sm text-gray-500 mt-0.5">Solde total : <span className="font-semibold text-gray-700">{totalBalance.toFixed(2)} $</span></p>
         </div>
-        <button onClick={() => setOpen(true)} className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors">
+        <button onClick={() => setOpen(true)} className="flex items-center gap-2 bg-green-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-green-800 transition-colors">
           <Plus size={16} /> Nouveau compte
         </button>
       </div>
@@ -77,7 +77,7 @@ export function AccountList() {
             <Wallet size={20} className="text-gray-400" />
           </div>
           <p className="text-gray-500">Aucun compte. Créez-en un pour commencer.</p>
-          <button onClick={() => setOpen(true)} className="mt-4 text-indigo-600 text-sm hover:underline">Créer un compte</button>
+          <button onClick={() => setOpen(true)} className="mt-4 text-green-700 text-sm hover:underline">Créer un compte</button>
         </div>
       ) : (
         <div className="grid gap-4">
@@ -120,7 +120,7 @@ export function AccountList() {
                 const Icon = ACCOUNT_ICONS[t];
                 return (
                   <button key={t} type="button" onClick={() => setForm(f => ({ ...f, type: t }))}
-                    className={`flex flex-col items-center gap-1.5 py-3 rounded-lg border text-xs font-medium transition-colors ${form.type === t ? 'bg-indigo-50 border-indigo-400 text-indigo-700' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
+                    className={`flex flex-col items-center gap-1.5 py-3 rounded-lg border text-xs font-medium transition-colors ${form.type === t ? 'bg-green-50 border-green-500 text-green-800' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
                     <Icon size={18} />
                     {ACCOUNT_LABELS[t]}
                   </button>
@@ -132,7 +132,7 @@ export function AccountList() {
             <label className="block text-sm font-medium text-gray-700 mb-1">Solde initial ($)</label>
             <input type="number" min="0" step="0.01" className="w-full border rounded-lg px-3 py-2 text-sm" value={form.initialBalance} onChange={e => setForm(f => ({ ...f, initialBalance: Number(e.target.value) }))} />
           </div>
-          <button type="submit" disabled={createMutation.isPending} className="w-full bg-indigo-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-60 transition-colors">
+          <button type="submit" disabled={createMutation.isPending} className="w-full bg-green-700 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-green-800 disabled:opacity-60 transition-colors">
             {createMutation.isPending ? 'Création...' : 'Créer le compte'}
           </button>
         </form>

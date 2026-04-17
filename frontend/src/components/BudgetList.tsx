@@ -68,7 +68,7 @@ export function BudgetList() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap gap-3 items-start justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Budgets</h1>
           <p className="text-sm text-gray-500 mt-0.5">{totalSpent.toFixed(2)} $ / {totalBudgeted.toFixed(2)} $ dépensé</p>
@@ -82,7 +82,7 @@ export function BudgetList() {
             </select>
             <input className="border rounded-lg px-2 py-1.5 text-sm w-20" type="number" value={year} onChange={e => setYear(Number(e.target.value))} />
           </div>
-          <button onClick={() => setOpen(true)} className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors">
+          <button onClick={() => setOpen(true)} className="flex items-center gap-2 bg-green-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-green-800 transition-colors">
             <Plus size={16} /> Nouveau budget
           </button>
         </div>
@@ -96,7 +96,7 @@ export function BudgetList() {
             <PiggyBank size={20} className="text-gray-400" />
           </div>
           <p className="text-gray-500">Aucun budget pour ce mois.</p>
-          <button onClick={() => setOpen(true)} className="mt-4 text-indigo-600 text-sm hover:underline">Créer un budget</button>
+          <button onClick={() => setOpen(true)} className="mt-4 text-green-700 text-sm hover:underline">Créer un budget</button>
         </div>
       ) : (
         <div className="grid gap-4">
@@ -136,7 +136,7 @@ export function BudgetList() {
             <div className="grid grid-cols-2 gap-2">
               {CATEGORIES.map(c => (
                 <button key={c} type="button" onClick={() => setForm(f => ({ ...f, category: c }))}
-                  className={`py-2 px-3 rounded-lg border text-sm text-left transition-colors ${form.category === c ? 'bg-indigo-50 border-indigo-400 text-indigo-700 font-medium' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
+                  className={`py-2 px-3 rounded-lg border text-sm text-left transition-colors ${form.category === c ? 'bg-green-50 border-green-500 text-green-800 font-medium' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
                   {CATEGORY_LABELS[c]}
                 </button>
               ))}
@@ -146,7 +146,7 @@ export function BudgetList() {
             <label className="block text-sm font-medium text-gray-700 mb-1">Limite mensuelle ($)</label>
             <input required type="number" min="1" step="0.01" className="w-full border rounded-lg px-3 py-2 text-sm" value={form.monthlyLimit} onChange={e => setForm(f => ({ ...f, monthlyLimit: Number(e.target.value) }))} placeholder="Ex: 400.00" />
           </div>
-          <button type="submit" disabled={createMutation.isPending} className="w-full bg-indigo-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-60 transition-colors">
+          <button type="submit" disabled={createMutation.isPending} className="w-full bg-green-700 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-green-800 disabled:opacity-60 transition-colors">
             {createMutation.isPending ? 'Création...' : 'Créer le budget'}
           </button>
         </form>

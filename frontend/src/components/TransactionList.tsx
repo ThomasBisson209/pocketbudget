@@ -94,7 +94,7 @@ function TransactionForm({ onClose }: { onClose: () => void }) {
           </select>
         </div>
       )}
-      <button type="submit" disabled={mutation.isPending} className="w-full bg-indigo-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-60 transition-colors">
+      <button type="submit" disabled={mutation.isPending} className="w-full bg-green-700 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-green-800 disabled:opacity-60 transition-colors">
         {mutation.isPending ? 'Enregistrement...' : 'Ajouter la transaction'}
       </button>
     </form>
@@ -123,7 +123,7 @@ export function TransactionList() {
           <h1 className="text-2xl font-bold text-gray-900">Transactions</h1>
           <p className="text-sm text-gray-500 mt-0.5">{transactions.length} transaction{transactions.length !== 1 ? 's' : ''}</p>
         </div>
-        <button onClick={() => setOpen(true)} className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors">
+        <button onClick={() => setOpen(true)} className="flex items-center gap-2 bg-green-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-green-800 transition-colors">
           <Plus size={16} /> Nouvelle transaction
         </button>
       </div>

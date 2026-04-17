@@ -64,14 +64,14 @@ export function DashboardView() {
       ) : (
         <div className="space-y-6">
           {/* Stat cards */}
-          <div className="grid grid-cols-2 gap-4">
-            <StatCard label="Solde total" value={`${data.totalBalance.toFixed(2)} $`} sub={`${data.totalAccounts} compte${data.totalAccounts !== 1 ? 's' : ''}`} icon={Wallet} color="bg-indigo-500" />
-            <StatCard label="Total budgeté" value={`${data.totalBudgeted.toFixed(2)} $`} sub={`${data.budgetSummaries.length} catégorie${data.budgetSummaries.length !== 1 ? 's' : ''}`} icon={CreditCard} color="bg-blue-500" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <StatCard label="Solde total" value={`${data.totalBalance.toFixed(2)} $`} sub={`${data.totalAccounts} compte${data.totalAccounts !== 1 ? 's' : ''}`} icon={Wallet} color="bg-green-700" />
+            <StatCard label="Total budgeté" value={`${data.totalBudgeted.toFixed(2)} $`} sub={`${data.budgetSummaries.length} catégorie${data.budgetSummaries.length !== 1 ? 's' : ''}`} icon={CreditCard} color="bg-teal-600" />
             <StatCard label="Total dépensé" value={`${data.totalSpent.toFixed(2)} $`} icon={TrendingDown} color="bg-red-500" />
             <StatCard label="Restant" value={`${data.totalRemaining.toFixed(2)} $`} icon={TrendingUp} color={data.totalRemaining >= 0 ? 'bg-green-500' : 'bg-orange-500'} />
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {/* Pie chart */}
             {pieData.length > 0 ? (
               <div className="bg-white rounded-xl border p-5">

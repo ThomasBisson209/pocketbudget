@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Leaf } from 'lucide-react';
 import { login, register, saveAuth } from '../auth';
 
 interface Props {
@@ -30,10 +31,16 @@ export function AuthPage({ onAuthenticated }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="bg-white rounded-xl shadow-md p-8 w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-indigo-700 mb-1 text-center">PocketBudget</h1>
-        <p className="text-sm text-gray-400 text-center mb-6">
+    <div className="min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-green-700 flex items-center justify-center px-4">
+      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm">
+        {/* Logo */}
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <div className="w-9 h-9 bg-green-700 rounded-xl flex items-center justify-center">
+            <Leaf size={20} className="text-white" />
+          </div>
+          <h1 className="text-2xl font-bold text-green-900">PocketBudget</h1>
+        </div>
+        <p className="text-sm text-gray-400 text-center mb-7">
           {mode === 'login' ? 'Connectez-vous à votre compte' : 'Créez un nouveau compte'}
         </p>
 
@@ -41,33 +48,35 @@ export function AuthPage({ onAuthenticated }: Props) {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Nom d'utilisateur</label>
             <input
-              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
               value={username}
               onChange={e => setUsername(e.target.value)}
               required
               autoComplete="username"
+              placeholder="ex: jean.tremblay"
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
             <input
               type="password"
-              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
               autoComplete="current-password"
+              placeholder="••••••••"
             />
           </div>
 
           {error && (
-            <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded px-3 py-2">{error}</p>
+            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-indigo-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-60 transition-colors"
+            className="w-full bg-green-700 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-green-800 disabled:opacity-60 transition-colors mt-1"
           >
             {loading ? 'Chargement...' : mode === 'login' ? 'Se connecter' : "S'inscrire"}
           </button>
@@ -77,7 +86,7 @@ export function AuthPage({ onAuthenticated }: Props) {
           {mode === 'login' ? 'Pas encore de compte?' : 'Déjà un compte?'}{' '}
           <button
             onClick={() => { setMode(m => m === 'login' ? 'register' : 'login'); setError(''); }}
-            className="text-indigo-600 hover:underline font-medium"
+            className="text-green-700 hover:underline font-medium"
           >
             {mode === 'login' ? "S'inscrire" : 'Se connecter'}
           </button>
