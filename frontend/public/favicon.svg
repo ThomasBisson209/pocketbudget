@@ -1,20 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- Forest green rounded background -->
-  <rect width="32" height="32" rx="7" fill="#15803d"/>
-
-  <!-- Wallet body (white) -->
-  <rect x="5" y="13" width="22" height="13" rx="2.5" fill="white"/>
-
-  <!-- Wallet top flap -->
-  <path d="M7 13 L25 13 L25 11 Q25 9 23 9 L9 9 Q7 9 7 11 Z" fill="#dcfce7"/>
-
-  <!-- Card pocket (right side) -->
-  <rect x="17.5" y="16" width="7.5" height="7" rx="1.5" fill="#15803d"/>
-
-  <!-- Coin in pocket -->
-  <circle cx="21.5" cy="19.5" r="2" fill="#86efac"/>
-
-  <!-- Card lines (left side) -->
-  <rect x="8" y="16.5" width="7.5" height="1.5" rx="0.75" fill="#86efac" opacity="0.8"/>
-  <rect x="8" y="20"   width="5"   height="1.5" rx="0.75" fill="#86efac" opacity="0.5"/>
+  <rect width="32" height="32" rx="7" fill="#14532d"/>
+  <path d="M16 5C12 5 7 10 7 17C7 23 11 27 16 27C21 27 25 23 25 17C25 10 20 5 16 5Z" fill="#4ade80"/>
+  <path d="M16 26Q15 29 13 31" stroke="#4ade80" stroke-width="2" stroke-linecap="round" fill="none"/>
+  <path d="M16 9L16 24" stroke="#14532d" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
 </svg>

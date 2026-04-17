@@ -1,4 +1,6 @@
-import { LayoutDashboard, ArrowLeftRight, CreditCard, PiggyBank, LogOut, X, User, Settings } from 'lucide-react';
+import { LayoutDashboard, ArrowLeftRight, CreditCard, PiggyBank, LogOut, X, Settings } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { budgetApi } from '../api';
 
 type Tab = 'dashboard' | 'transactions' | 'accounts' | 'budgets' | 'profile' | 'settings';
 
@@ -10,19 +12,39 @@ interface SidebarProps {
   onClose?: () => void;
 }
 
-const NAV_ITEMS: { tab: Tab; label: string; Icon: React.ElementType }[] = [
-  { tab: 'dashboard',    label: 'Tableau de bord', Icon: LayoutDashboard },
-  { tab: 'transactions', label: 'Transactions',     Icon: ArrowLeftRight },
-  { tab: 'accounts',     label: 'Comptes',          Icon: CreditCard },
-  { tab: 'budgets',      label: 'Budgets',          Icon: PiggyBank },
-];
-
-const BOTTOM_NAV: { tab: Tab; label: string; Icon: React.ElementType }[] = [
-  { tab: 'profile',  label: 'Profil',      Icon: User },
-  { tab: 'settings', label: 'Paramètres',  Icon: Settings },
-];
-
 export function Sidebar({ activeTab, onTabChange, username, onLogout, onClose }: SidebarProps) {
+  const now = new Date();
+
+  // Fetch current month budgets to show alert badge
+  const { data: budgets = [] } = useQuery({
+    queryKey: ['budgets', now.getMonth() + 1, now.getFullYear()],
+    queryFn: () => budgetApi.getByMonth(now.getMonth() + 1, now.getFullYear()),
+    staleTime: 60_000,
+  });
+
+  const alertCount = budgets.filter(b => b.monthlyLimit > 0 && (b.currentSpent / b.monthlyLimit) >= 0.8).length;
+
+  function NavButton({ tab, label, Icon, badge }: { tab: Tab; label: string; Icon: React.ElementType; badge?: number }) {
+    return (
+      <button
+        onClick={() => { onTabChange(tab); onClose?.(); }}
+        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+          activeTab === tab
+            ? 'bg-green-700 text-white'
+            : 'text-green-200 hover:bg-green-800 hover:text-white'
+        }`}
+      >
+        <Icon size={18} />
+        <span className="flex-1 text-left">{label}</span>
+        {badge != null && badge > 0 && (
+          <span className="w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center shrink-0">
+            {badge > 9 ? '9+' : badge}
+          </span>
+        )}
+      </button>
+    );
+  }
+
   return (
     <aside className="w-60 shrink-0 bg-green-900 text-white flex flex-col h-full">
       {/* Logo */}
@@ -40,38 +62,15 @@ export function Sidebar({ activeTab, onTabChange, username, onLogout, onClose }:
 
       {/* Main nav */}
       <nav className="flex-1 px-3 py-4 space-y-1">
-        {NAV_ITEMS.map(({ tab, label, Icon }) => (
-          <button
-            key={tab}
-            onClick={() => { onTabChange(tab); onClose?.(); }}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-              activeTab === tab
-                ? 'bg-green-700 text-white'
-                : 'text-green-200 hover:bg-green-800 hover:text-white'
-            }`}
-          >
-            <Icon size={18} />
-            {label}
-          </button>
-        ))}
+        <NavButton tab="dashboard"    label="Tableau de bord" Icon={LayoutDashboard} />
+        <NavButton tab="transactions" label="Transactions"     Icon={ArrowLeftRight} />
+        <NavButton tab="accounts"     label="Comptes"          Icon={CreditCard} />
+        <NavButton tab="budgets"      label="Budgets"          Icon={PiggyBank} badge={alertCount} />
       </nav>
 
-      {/* Bottom nav (profile + settings) */}
+      {/* Bottom nav (settings only) */}
       <div className="px-3 pb-2 space-y-1 border-t border-green-800 pt-3">
-        {BOTTOM_NAV.map(({ tab, label, Icon }) => (
-          <button
-            key={tab}
-            onClick={() => { onTabChange(tab); onClose?.(); }}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-              activeTab === tab
-                ? 'bg-green-700 text-white'
-                : 'text-green-200 hover:bg-green-800 hover:text-white'
-            }`}
-          >
-            <Icon size={18} />
-            {label}
-          </button>
-        ))}
+        <NavButton tab="settings" label="Paramètres" Icon={Settings} />
       </div>
 
       {/* User footer */}

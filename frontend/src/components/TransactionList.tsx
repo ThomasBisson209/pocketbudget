@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
-import { Plus, TrendingDown, TrendingUp } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Plus, TrendingDown, TrendingUp, Search, X, Download } from 'lucide-react';
 import { transactionApi, accountApi, budgetApi } from '../api';
+import type { Transaction, Account } from '../types';
 import type { CreateTransactionRequest } from '../types';
 import { Modal } from './ui/Modal';
 import { Badge } from './ui/Badge';
@@ -15,6 +16,26 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 const now = new Date();
 
+// ── CSV Export ────────────────────────────────────────────────────────────────
+function exportCSV(transactions: Transaction[], accounts: Account[]) {
+  const accountName = (id: string) => accounts.find(a => a.accountId === id)?.name ?? id;
+  const header = 'Date,Description,Compte,Type,Montant ($),Catégorie';
+  const rows = transactions.map(t => {
+    const amount = t.type === 'DEBIT' ? -t.amount : t.amount;
+    const cat = t.budgetCategory ? (CATEGORY_LABELS[t.budgetCategory] ?? t.budgetCategory) : '';
+    return `${t.date},"${t.description}","${accountName(t.accountId)}",${t.type},${amount},"${cat}"`;
+  });
+  const csv = '\ufeff' + [header, ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `transactions-${new Date().toISOString().slice(0, 7)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── Transaction form ──────────────────────────────────────────────────────────
 function TransactionForm({ onClose }: { onClose: () => void }) {
   const toast = useToast();
   const queryClient = useQueryClient();
@@ -36,6 +57,7 @@ function TransactionForm({ onClose }: { onClose: () => void }) {
       queryClient.invalidateQueries({ queryKey: ['accounts'] });
       queryClient.invalidateQueries({ queryKey: ['budgets'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['balance-history'] });
       toast.success('Transaction ajoutée');
       onClose();
     },
@@ -57,14 +79,12 @@ function TransactionForm({ onClose }: { onClose: () => void }) {
         <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
         <div className="flex gap-2">
           {(['DEBIT', 'CREDIT'] as const).map(t => (
-            <button key={t} type="button"
-              onClick={() => set('type', t)}
+            <button key={t} type="button" onClick={() => set('type', t)}
               className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border text-sm font-medium transition-colors ${
                 form.type === t
                   ? t === 'DEBIT' ? 'bg-red-50 border-red-400 text-red-700' : 'bg-green-50 border-green-400 text-green-700'
                   : 'border-gray-200 text-gray-500 hover:bg-gray-50'
-              }`}
-            >
+              }`}>
               {t === 'DEBIT' ? <TrendingDown size={15} /> : <TrendingUp size={15} />}
               {t === 'DEBIT' ? 'Dépense' : 'Revenu'}
             </button>
@@ -101,15 +121,51 @@ function TransactionForm({ onClose }: { onClose: () => void }) {
   );
 }
 
+// ── Main component ────────────────────────────────────────────────────────────
+type FilterType = 'ALL' | 'DEBIT' | 'CREDIT';
+
 export function TransactionList() {
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const [filterType, setFilterType] = useState<FilterType>('ALL');
+  const [filterAccountId, setFilterAccountId] = useState('');
+  const [filterMonth, setFilterMonth] = useState<number>(0); // 0 = all months
+  const [filterYear, setFilterYear] = useState<number>(now.getFullYear());
+
   const { data: transactions = [], isLoading } = useQuery({ queryKey: ['transactions'], queryFn: transactionApi.getAll });
   const { data: accounts = [] } = useQuery({ queryKey: ['accounts'], queryFn: accountApi.getAll });
 
   const accountName = (id: string) => accounts.find(a => a.accountId === id)?.name ?? id.slice(0, 8);
 
-  // Groupe par date
-  const grouped = transactions.reduce<Record<string, typeof transactions>>((acc, t) => {
+  // ── Client-side filtering ──────────────────────────────────────────────────
+  const filtered = useMemo(() => {
+    return transactions.filter(t => {
+      if (search && !t.description.toLowerCase().includes(search.toLowerCase())) return false;
+      if (filterType !== 'ALL' && t.type !== filterType) return false;
+      if (filterAccountId && t.accountId !== filterAccountId) return false;
+      if (filterMonth > 0) {
+        const [y, m] = t.date.split('-').map(Number);
+        if (m !== filterMonth || y !== filterYear) return false;
+      }
+      return true;
+    });
+  }, [transactions, search, filterType, filterAccountId, filterMonth, filterYear]);
+
+  const hasFilters = search !== '' || filterType !== 'ALL' || filterAccountId !== '' || filterMonth > 0;
+
+  function clearFilters() {
+    setSearch('');
+    setFilterType('ALL');
+    setFilterAccountId('');
+    setFilterMonth(0);
+  }
+
+  // ── Totals for filtered results ────────────────────────────────────────────
+  const totalDebit  = filtered.filter(t => t.type === 'DEBIT').reduce((s, t) => s + t.amount, 0);
+  const totalCredit = filtered.filter(t => t.type === 'CREDIT').reduce((s, t) => s + t.amount, 0);
+
+  // ── Group by date ──────────────────────────────────────────────────────────
+  const grouped = filtered.reduce<Record<string, typeof filtered>>((acc, t) => {
     (acc[t.date] = acc[t.date] ?? []).push(t);
     return acc;
   }, {});
@@ -118,23 +174,130 @@ export function TransactionList() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Transactions</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{transactions.length} transaction{transactions.length !== 1 ? 's' : ''}</p>
+          <p className="text-sm text-gray-500 mt-0.5">{transactions.length} au total</p>
         </div>
-        <button onClick={() => setOpen(true)} className="flex items-center gap-2 bg-green-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-green-800 transition-colors">
-          <Plus size={16} /> Nouvelle transaction
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => exportCSV(filtered, accounts)}
+            title="Exporter en CSV"
+            className="flex items-center gap-2 border border-gray-200 text-gray-600 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+          >
+            <Download size={16} />
+            <span className="hidden sm:inline">CSV</span>
+          </button>
+          <button
+            onClick={() => setOpen(true)}
+            className="flex items-center gap-2 bg-green-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-green-800 transition-colors"
+          >
+            <Plus size={16} />
+            <span className="hidden sm:inline">Nouvelle transaction</span>
+            <span className="sm:hidden">Ajouter</span>
+          </button>
+        </div>
       </div>
 
+      {/* Filter bar */}
+      <div className="bg-white rounded-xl border p-4 mb-4 space-y-3">
+        {/* Search */}
+        <div className="relative">
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Rechercher une description..."
+            className="w-full border rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          {search && (
+            <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500">
+              <X size={14} />
+            </button>
+          )}
+        </div>
+
+        {/* Filter pills */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Type filter */}
+          {(['ALL', 'DEBIT', 'CREDIT'] as const).map(t => (
+            <button key={t} onClick={() => setFilterType(t)}
+              className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                filterType === t
+                  ? t === 'DEBIT' ? 'bg-red-100 border-red-300 text-red-700'
+                    : t === 'CREDIT' ? 'bg-green-100 border-green-300 text-green-700'
+                    : 'bg-green-700 border-green-700 text-white'
+                  : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+              }`}>
+              {t === 'ALL' ? 'Tout' : t === 'DEBIT' ? '↓ Dépenses' : '↑ Revenus'}
+            </button>
+          ))}
+
+          {/* Account filter */}
+          <select
+            className="border rounded-full px-3 py-1 text-xs text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+            value={filterAccountId}
+            onChange={e => setFilterAccountId(e.target.value)}
+          >
+            <option value="">Tous les comptes</option>
+            {accounts.map(a => <option key={a.accountId} value={a.accountId}>{a.name}</option>)}
+          </select>
+
+          {/* Month filter */}
+          <div className="flex items-center gap-1">
+            <select
+              className="border rounded-full px-3 py-1 text-xs text-gray-600 focus:outline-none"
+              value={filterMonth}
+              onChange={e => setFilterMonth(Number(e.target.value))}
+            >
+              <option value={0}>Tous les mois</option>
+              {Array.from({ length: 12 }, (_, i) => (
+                <option key={i + 1} value={i + 1}>
+                  {new Date(2000, i).toLocaleString('fr-CA', { month: 'short' })}
+                </option>
+              ))}
+            </select>
+            {filterMonth > 0 && (
+              <input
+                type="number"
+                className="border rounded-full px-2 py-1 text-xs w-16"
+                value={filterYear}
+                onChange={e => setFilterYear(Number(e.target.value))}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Active filters summary */}
+        {hasFilters && (
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-gray-500">
+              <span className="font-semibold text-gray-700">{filtered.length}</span> résultat{filtered.length !== 1 ? 's' : ''} —
+              <span className="text-red-600 ml-1">↓ {totalDebit.toFixed(2)} $</span>
+              <span className="text-green-600 ml-2">↑ {totalCredit.toFixed(2)} $</span>
+            </span>
+            <button onClick={clearFilters} className="text-green-700 hover:underline flex items-center gap-1">
+              <X size={11} /> Effacer les filtres
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Transaction list */}
       {isLoading ? (
         <div className="text-center py-12 text-gray-400">Chargement...</div>
-      ) : transactions.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-xl border">
-          <ArrowLeftRightIcon />
-          <p className="text-gray-500 mt-3">Aucune transaction pour le moment</p>
-          <button onClick={() => setOpen(true)} className="mt-4 text-indigo-600 text-sm hover:underline">Ajouter une transaction</button>
+          <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <Search size={20} className="text-gray-400" />
+          </div>
+          <p className="text-gray-500">{hasFilters ? 'Aucun résultat pour ces filtres' : 'Aucune transaction pour le moment'}</p>
+          {hasFilters
+            ? <button onClick={clearFilters} className="mt-3 text-green-700 text-sm hover:underline">Effacer les filtres</button>
+            : <button onClick={() => setOpen(true)} className="mt-3 text-green-700 text-sm hover:underline">Ajouter une transaction</button>
+          }
         </div>
       ) : (
         <div className="space-y-6">
@@ -154,7 +317,7 @@ export function TransactionList() {
                         {t.budgetCategory && <Badge variant="info">{CATEGORY_LABELS[t.budgetCategory] ?? t.budgetCategory}</Badge>}
                       </div>
                     </div>
-                    <p className={`text-sm font-semibold ${t.type === 'DEBIT' ? 'text-red-600' : 'text-green-600'}`}>
+                    <p className={`text-sm font-semibold shrink-0 ${t.type === 'DEBIT' ? 'text-red-600' : 'text-green-600'}`}>
                       {t.type === 'DEBIT' ? '-' : '+'}{t.amount.toFixed(2)} $
                     </p>
                   </div>
@@ -168,16 +331,6 @@ export function TransactionList() {
       <Modal isOpen={open} onClose={() => setOpen(false)} title="Nouvelle transaction">
         <TransactionForm onClose={() => setOpen(false)} />
       </Modal>
-    </div>
-  );
-}
-
-function ArrowLeftRightIcon() {
-  return (
-    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400">
-        <path d="m21 7-18 0M3 7l4-4M3 7l4 4M21 17H3M21 17l-4-4M21 17l-4 4"/>
-      </svg>
     </div>
   );
 }
