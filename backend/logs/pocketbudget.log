@@ -1,9 +1,0 @@
-2026-04-12 22:44:19.849 WARN  [p.application.auth.AuthService] Login attempt for unknown username: toto
-2026-04-12 22:44:26.730 INFO  [p.application.auth.AuthService] New user registered: toto
-2026-04-12 22:45:32.123 INFO  [p.a.account.AccountService] Account created: name=Conjoint, type=CHECKING, balance=1000.0
-2026-04-12 22:45:56.803 INFO  [p.a.budget.BudgetService] Budget created: category=FOOD, limit=5.0, period=4/2026
-2026-04-12 22:47:34.592 INFO  [p.application.auth.AuthService] User logged in: toto
-2026-04-12 23:03:18.434 INFO  [p.a.account.AccountService] Account created: name=conjoint, type=CHECKING, balance=200.0
-2026-04-12 23:03:44.067 INFO  [p.a.t.TransactionService] Transaction created: type=CREDIT, amount=500.0, account=9d66294f-269f-4613-ac28-0da0bac46356, category=null
-2026-04-12 23:04:11.448 INFO  [p.a.budget.BudgetService] Budget created: category=FOOD, limit=200.0, period=4/2026
-2026-04-12 23:04:29.751 INFO  [p.a.t.TransactionService] Transaction created: type=DEBIT, amount=78.0, account=9d66294f-269f-4613-ac28-0da0bac46356, category=FOOD

@@ -1,5 +1,6 @@
 # Backend
 backend/target/
+backend/logs/
 
 # Frontend
 frontend/node_modules/
@@ -13,3 +14,6 @@ frontend/dist/
 # OS
 .DS_Store
 Thumbs.db
+
+# Claude
+.claude/
