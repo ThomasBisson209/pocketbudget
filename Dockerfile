@@ -40,8 +40,5 @@ WORKDIR /app
 # Copy the fat JAR produced by maven-shade-plugin
 COPY --from=backend /app/target/pocketbudget.jar app.jar
 
-# Data directory for H2 file database (mount a volume here for persistence)
-VOLUME /app/data
-
 EXPOSE 8080
 CMD ["java", "-jar", "app.jar"]
