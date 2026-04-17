@@ -15,5 +15,11 @@ frontend/dist/
 .DS_Store
 Thumbs.db
 
+# H2 database files
+data/
+
+# Frontend build output copied into backend for production
+backend/src/main/resources/static/
+
 # Claude
 .claude/

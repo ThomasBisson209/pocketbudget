@@ -1,0 +1,25 @@
+# Git
+.git/
+.github/
+
+# Frontend — built inside Docker, don't send to build context
+frontend/node_modules/
+frontend/dist/
+
+# Backend — built inside Docker
+backend/target/
+backend/logs/
+backend/src/main/resources/static/
+
+# H2 database files
+data/
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Claude
+.claude/

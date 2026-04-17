@@ -12,6 +12,7 @@ import pocketbudget.domain.account.AccountId;
 import pocketbudget.domain.account.AccountRepository;
 import pocketbudget.domain.account.AccountType;
 import pocketbudget.domain.account.exceptions.AccountNotFoundException;
+import pocketbudget.domain.transaction.TransactionRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,12 +25,14 @@ import static org.mockito.Mockito.*;
 class AccountServiceTest {
     @Mock
     private AccountRepository accountRepositoryMock;
+    @Mock
+    private TransactionRepository transactionRepositoryMock;
 
     private AccountService accountService;
 
     @BeforeEach
     void setup() {
-        accountService = new AccountService(accountRepositoryMock, new AccountAssembler());
+        accountService = new AccountService(accountRepositoryMock, new AccountAssembler(), transactionRepositoryMock);
     }
 
     @Test

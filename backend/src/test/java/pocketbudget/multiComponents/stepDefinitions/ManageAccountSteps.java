@@ -9,6 +9,7 @@ import pocketbudget.application.account.dtos.AccountDto;
 import pocketbudget.application.account.dtos.CreateAccountDto;
 import pocketbudget.domain.account.exceptions.AccountNotFoundException;
 import pocketbudget.infra.persistence.inMemory.InMemoryAccountRepository;
+import pocketbudget.infra.persistence.inMemory.InMemoryTransactionRepository;
 
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class ManageAccountSteps {
     @Before
     public void setup() {
         ConfigurationServerRest.useInMemoryRepositories();
-        accountService = new AccountService(new InMemoryAccountRepository(), new AccountAssembler());
+        accountService = new AccountService(new InMemoryAccountRepository(), new AccountAssembler(), new InMemoryTransactionRepository());
     }
 
     @Etantdonné("aucun compte existant")
