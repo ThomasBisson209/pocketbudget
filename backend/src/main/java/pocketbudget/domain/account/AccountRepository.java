@@ -7,6 +7,7 @@ public interface AccountRepository {
     void save(Account account);
     Optional<Account> findById(AccountId accountId);
     List<Account> findAll();
+    List<Account> findAllByUserId(String userId);
     void delete(AccountId accountId);
     boolean exists(AccountId accountId);
 }

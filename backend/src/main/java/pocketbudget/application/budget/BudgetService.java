@@ -25,38 +25,40 @@ public class BudgetService {
         this.budgetAssembler = budgetAssembler;
     }
 
-    public BudgetDto createBudget(CreateBudgetDto dto) {
+    public BudgetDto createBudget(CreateBudgetDto dto, String userId) {
         Budget budget = new Budget(
             BudgetId.generate(),
             BudgetCategory.fromString(dto.category),
             dto.monthlyLimit,
             dto.month,
-            dto.year
+            dto.year,
+            userId
         );
         budgetRepository.save(budget);
-        log.info("Budget created: category={}, limit={}, period={}/{}", dto.category, dto.monthlyLimit, dto.month, dto.year);
+        log.info("Budget created: category={}, limit={}, period={}/{}, userId={}", dto.category, dto.monthlyLimit, dto.month, dto.year, userId);
         return budgetAssembler.toDto(budget);
     }
 
-    public BudgetDto getBudget(String budgetId) {
+    public BudgetDto getBudget(String budgetId, String userId) {
         Budget budget = budgetRepository.findById(new BudgetId(budgetId))
+            .filter(b -> userId.equals(b.getUserId()))
             .orElseThrow(() -> new BudgetNotFoundException(budgetId));
         return budgetAssembler.toDto(budget);
     }
 
-    public List<BudgetDto> getAllBudgets() {
-        return budgetAssembler.toDtoList(budgetRepository.findAll());
+    public List<BudgetDto> getAllBudgets(String userId) {
+        return budgetAssembler.toDtoList(budgetRepository.findAllByUserId(userId));
     }
 
-    public List<BudgetDto> getBudgetsByMonth(int month, int year) {
-        return budgetAssembler.toDtoList(budgetRepository.findByMonthAndYear(month, year));
+    public List<BudgetDto> getBudgetsByMonth(int month, int year, String userId) {
+        return budgetAssembler.toDtoList(budgetRepository.findByMonthAndYearAndUserId(month, year, userId));
     }
 
-    public void deleteBudget(String budgetId) {
-        if (!budgetRepository.exists(new BudgetId(budgetId))) {
-            throw new BudgetNotFoundException(budgetId);
-        }
-        budgetRepository.delete(new BudgetId(budgetId));
-        log.info("Budget deleted: id={}", budgetId);
+    public void deleteBudget(String budgetId, String userId) {
+        Budget budget = budgetRepository.findById(new BudgetId(budgetId))
+            .filter(b -> userId.equals(b.getUserId()))
+            .orElseThrow(() -> new BudgetNotFoundException(budgetId));
+        budgetRepository.delete(budget.getBudgetId());
+        log.info("Budget deleted: id={}, userId={}", budgetId, userId);
     }
 }

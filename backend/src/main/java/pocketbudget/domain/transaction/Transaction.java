@@ -12,6 +12,9 @@ public class Transaction {
     @Column(nullable = false)
     private String accountId;
 
+    @Column(nullable = false)
+    private String userId;
+
     @Column
     private String budgetCategory;
 
@@ -30,11 +33,13 @@ public class Transaction {
 
     protected Transaction() {}
 
-    public Transaction(TransactionId transactionId, String accountId, String budgetCategory,
-                       String description, double amount, LocalDate date, TransactionType type) {
+    public Transaction(TransactionId transactionId, String accountId, String userId,
+                       String budgetCategory, String description, double amount,
+                       LocalDate date, TransactionType type) {
         if (amount <= 0) throw new IllegalArgumentException("Amount must be positive");
         this.transactionId = transactionId;
         this.accountId = accountId;
+        this.userId = userId;
         this.budgetCategory = budgetCategory;
         this.description = description;
         this.amount = amount;
@@ -44,6 +49,7 @@ public class Transaction {
 
     public TransactionId getTransactionId() { return transactionId; }
     public String getAccountId() { return accountId; }
+    public String getUserId() { return userId; }
     public String getBudgetCategory() { return budgetCategory; }
     public String getDescription() { return description; }
     public double getAmount() { return amount; }

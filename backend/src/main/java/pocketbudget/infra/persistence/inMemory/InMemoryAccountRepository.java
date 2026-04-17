@@ -5,6 +5,7 @@ import pocketbudget.domain.account.AccountId;
 import pocketbudget.domain.account.AccountRepository;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class InMemoryAccountRepository implements AccountRepository {
     private final Map<AccountId, Account> store = new HashMap<>();
@@ -22,6 +23,13 @@ public class InMemoryAccountRepository implements AccountRepository {
     @Override
     public List<Account> findAll() {
         return new ArrayList<>(store.values());
+    }
+
+    @Override
+    public List<Account> findAllByUserId(String userId) {
+        return store.values().stream()
+            .filter(a -> userId.equals(a.getUserId()))
+            .collect(Collectors.toList());
     }
 
     @Override

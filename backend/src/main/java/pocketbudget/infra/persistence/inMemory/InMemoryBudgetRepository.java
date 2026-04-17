@@ -26,9 +26,23 @@ public class InMemoryBudgetRepository implements BudgetRepository {
     }
 
     @Override
+    public List<Budget> findAllByUserId(String userId) {
+        return store.values().stream()
+            .filter(b -> userId.equals(b.getUserId()))
+            .collect(Collectors.toList());
+    }
+
+    @Override
     public List<Budget> findByMonthAndYear(int month, int year) {
         return store.values().stream()
             .filter(b -> b.getMonth() == month && b.getYear() == year)
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Budget> findByMonthAndYearAndUserId(int month, int year, String userId) {
+        return store.values().stream()
+            .filter(b -> b.getMonth() == month && b.getYear() == year && userId.equals(b.getUserId()))
             .collect(Collectors.toList());
     }
 

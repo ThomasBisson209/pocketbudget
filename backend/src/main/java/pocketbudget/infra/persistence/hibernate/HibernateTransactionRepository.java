@@ -37,6 +37,17 @@ public class HibernateTransactionRepository implements TransactionRepository {
     }
 
     @Override
+    public List<pocketbudget.domain.transaction.Transaction> findAllByUserId(String userId) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery(
+                "FROM Transaction t WHERE t.userId = :userId ORDER BY t.date DESC",
+                pocketbudget.domain.transaction.Transaction.class)
+                .setParameter("userId", userId)
+                .list();
+        }
+    }
+
+    @Override
     public List<pocketbudget.domain.transaction.Transaction> findByAccountId(String accountId) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.createQuery(
@@ -48,11 +59,35 @@ public class HibernateTransactionRepository implements TransactionRepository {
     }
 
     @Override
+    public List<pocketbudget.domain.transaction.Transaction> findByAccountIdAndUserId(String accountId, String userId) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery(
+                "FROM Transaction t WHERE t.accountId = :accountId AND t.userId = :userId ORDER BY t.date DESC",
+                pocketbudget.domain.transaction.Transaction.class)
+                .setParameter("accountId", accountId)
+                .setParameter("userId", userId)
+                .list();
+        }
+    }
+
+    @Override
     public List<pocketbudget.domain.transaction.Transaction> findRecentN(int n) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.createQuery(
                 "FROM Transaction t ORDER BY t.date DESC",
                 pocketbudget.domain.transaction.Transaction.class)
+                .setMaxResults(n)
+                .list();
+        }
+    }
+
+    @Override
+    public List<pocketbudget.domain.transaction.Transaction> findRecentNByUserId(int n, String userId) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery(
+                "FROM Transaction t WHERE t.userId = :userId ORDER BY t.date DESC",
+                pocketbudget.domain.transaction.Transaction.class)
+                .setParameter("userId", userId)
                 .setMaxResults(n)
                 .list();
         }

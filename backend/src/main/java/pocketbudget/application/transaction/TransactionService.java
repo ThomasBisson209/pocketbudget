@@ -41,18 +41,20 @@ public class TransactionService {
         this.assembler = assembler;
     }
 
-    public TransactionDto createTransaction(CreateTransactionDto dto) {
+    public TransactionDto createTransaction(CreateTransactionDto dto, String userId) {
+        // Verify the account belongs to this user
         Account account = accountRepository.findById(new AccountId(dto.accountId))
+            .filter(a -> userId.equals(a.getUserId()))
             .orElseThrow(() -> new AccountNotFoundException(dto.accountId));
 
         LocalDate date = LocalDate.parse(dto.date);
         TransactionType type = TransactionType.fromString(dto.type);
 
-        // Pre-validate budget before touching account balance
+        // Pre-validate budget before touching account balance (user-scoped)
         Budget matchingBudget = null;
         if (type == TransactionType.DEBIT && dto.budgetCategory != null && !dto.budgetCategory.isBlank()) {
             Optional<Budget> budgetOpt = budgetRepository
-                .findByMonthAndYear(date.getMonthValue(), date.getYear())
+                .findByMonthAndYearAndUserId(date.getMonthValue(), date.getYear(), userId)
                 .stream()
                 .filter(b -> b.getCategory().name().equalsIgnoreCase(dto.budgetCategory))
                 .findFirst();
@@ -81,6 +83,7 @@ public class TransactionService {
         Transaction transaction = new Transaction(
             TransactionId.generate(),
             dto.accountId,
+            userId,
             dto.budgetCategory,
             dto.description,
             dto.amount,
@@ -88,22 +91,26 @@ public class TransactionService {
             type
         );
         transactionRepository.save(transaction);
-        log.info("Transaction created: type={}, amount={}, account={}, category={}", type, dto.amount, dto.accountId, dto.budgetCategory);
+        log.info("Transaction created: type={}, amount={}, account={}, category={}, userId={}", type, dto.amount, dto.accountId, dto.budgetCategory, userId);
         return assembler.toDto(transaction);
     }
 
-    public TransactionDto getTransaction(String id) {
-        return assembler.toDto(
-            transactionRepository.findById(new TransactionId(id))
-                .orElseThrow(() -> new TransactionNotFoundException(id))
-        );
+    public TransactionDto getTransaction(String id, String userId) {
+        Transaction t = transactionRepository.findById(new TransactionId(id))
+            .filter(tx -> userId.equals(tx.getUserId()))
+            .orElseThrow(() -> new TransactionNotFoundException(id));
+        return assembler.toDto(t);
     }
 
-    public List<TransactionDto> getAllTransactions() {
-        return assembler.toDtoList(transactionRepository.findAll());
+    public List<TransactionDto> getAllTransactions(String userId) {
+        return assembler.toDtoList(transactionRepository.findAllByUserId(userId));
     }
 
-    public List<TransactionDto> getTransactionsByAccount(String accountId) {
-        return assembler.toDtoList(transactionRepository.findByAccountId(accountId));
+    public List<TransactionDto> getTransactionsByAccount(String accountId, String userId) {
+        // Verify the account belongs to this user first
+        accountRepository.findById(new AccountId(accountId))
+            .filter(a -> userId.equals(a.getUserId()))
+            .orElseThrow(() -> new AccountNotFoundException(accountId));
+        return assembler.toDtoList(transactionRepository.findByAccountIdAndUserId(accountId, userId));
     }
 }

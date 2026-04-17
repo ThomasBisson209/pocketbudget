@@ -19,9 +19,12 @@ public class Account {
     @Column(nullable = false)
     private double balance;
 
+    @Column(nullable = false)
+    private String userId;
+
     protected Account() {}
 
-    public Account(AccountId accountId, String name, AccountType type, double initialBalance) {
+    public Account(AccountId accountId, String name, AccountType type, double initialBalance, String userId) {
         if (initialBalance < 0) {
             throw new InvalidBalanceException("Initial balance cannot be negative");
         }
@@ -29,6 +32,7 @@ public class Account {
         this.name = name;
         this.type = type;
         this.balance = initialBalance;
+        this.userId = userId;
     }
 
     public void deposit(double amount) {
@@ -48,19 +52,9 @@ public class Account {
         this.balance -= amount;
     }
 
-    public AccountId getAccountId() {
-        return accountId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public AccountType getType() {
-        return type;
-    }
-
-    public double getBalance() {
-        return balance;
-    }
+    public AccountId getAccountId() { return accountId; }
+    public String getName() { return name; }
+    public AccountType getType() { return type; }
+    public double getBalance() { return balance; }
+    public String getUserId() { return userId; }
 }

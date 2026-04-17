@@ -25,9 +25,12 @@ public class Budget {
     @Column(nullable = false)
     private int year;
 
+    @Column(nullable = false)
+    private String userId;
+
     protected Budget() {}
 
-    public Budget(BudgetId budgetId, BudgetCategory category, double monthlyLimit, int month, int year) {
+    public Budget(BudgetId budgetId, BudgetCategory category, double monthlyLimit, int month, int year, String userId) {
         if (monthlyLimit <= 0) {
             throw new IllegalArgumentException("Monthly limit must be positive");
         }
@@ -37,6 +40,7 @@ public class Budget {
         this.currentSpent = 0;
         this.month = month;
         this.year = year;
+        this.userId = userId;
     }
 
     public void addExpense(double amount) {
@@ -49,35 +53,13 @@ public class Budget {
         this.currentSpent += amount;
     }
 
-    public double getRemainingAmount() {
-        return monthlyLimit - currentSpent;
-    }
-
-    public boolean isOverBudget() {
-        return currentSpent > monthlyLimit;
-    }
-
-    public BudgetId getBudgetId() {
-        return budgetId;
-    }
-
-    public BudgetCategory getCategory() {
-        return category;
-    }
-
-    public double getMonthlyLimit() {
-        return monthlyLimit;
-    }
-
-    public double getCurrentSpent() {
-        return currentSpent;
-    }
-
-    public int getMonth() {
-        return month;
-    }
-
-    public int getYear() {
-        return year;
-    }
+    public double getRemainingAmount() { return monthlyLimit - currentSpent; }
+    public boolean isOverBudget() { return currentSpent > monthlyLimit; }
+    public BudgetId getBudgetId() { return budgetId; }
+    public BudgetCategory getCategory() { return category; }
+    public double getMonthlyLimit() { return monthlyLimit; }
+    public double getCurrentSpent() { return currentSpent; }
+    public int getMonth() { return month; }
+    public int getYear() { return year; }
+    public String getUserId() { return userId; }
 }

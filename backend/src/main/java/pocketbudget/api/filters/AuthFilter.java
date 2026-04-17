@@ -35,7 +35,8 @@ public class AuthFilter implements ContainerRequestFilter {
 
         String token = header.substring(BEARER_PREFIX.length());
         try {
-            jwtService.validateTokenAndGetUsername(token);
+            String username = jwtService.validateTokenAndGetUsername(token);
+            ctx.setProperty("username", username);
         } catch (JwtException e) {
             abort(ctx, "Invalid or expired token");
         }

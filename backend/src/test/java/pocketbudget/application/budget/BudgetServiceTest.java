@@ -18,10 +18,13 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class BudgetServiceTest {
+    private static final String TEST_USER = "testUser";
+
     @Mock
     private BudgetRepository budgetRepositoryMock;
 
@@ -40,7 +43,7 @@ class BudgetServiceTest {
         dto.month = 4;
         dto.year = 2026;
 
-        BudgetDto result = budgetService.createBudget(dto);
+        BudgetDto result = budgetService.createBudget(dto, TEST_USER);
 
         verify(budgetRepositoryMock).save(any(Budget.class));
         assertEquals("FOOD", result.category);
@@ -52,18 +55,18 @@ class BudgetServiceTest {
     void givenUnknownBudgetId_whenGetBudget_thenThrowsBudgetNotFoundException() {
         when(budgetRepositoryMock.findById(any())).thenReturn(Optional.empty());
 
-        assertThrows(BudgetNotFoundException.class, () -> budgetService.getBudget("unknown-id"));
+        assertThrows(BudgetNotFoundException.class, () -> budgetService.getBudget("unknown-id", TEST_USER));
     }
 
     @Test
     void givenBudgetsForMonth_whenGetBudgetsByMonth_thenReturnsFilteredList() {
         List<Budget> budgets = List.of(
-            new Budget(BudgetId.generate(), BudgetCategory.FOOD, 300.0, 4, 2026),
-            new Budget(BudgetId.generate(), BudgetCategory.TRANSPORT, 150.0, 4, 2026)
+            new Budget(BudgetId.generate(), BudgetCategory.FOOD, 300.0, 4, 2026, TEST_USER),
+            new Budget(BudgetId.generate(), BudgetCategory.TRANSPORT, 150.0, 4, 2026, TEST_USER)
         );
-        when(budgetRepositoryMock.findByMonthAndYear(4, 2026)).thenReturn(budgets);
+        when(budgetRepositoryMock.findByMonthAndYearAndUserId(4, 2026, TEST_USER)).thenReturn(budgets);
 
-        List<BudgetDto> result = budgetService.getBudgetsByMonth(4, 2026);
+        List<BudgetDto> result = budgetService.getBudgetsByMonth(4, 2026, TEST_USER);
 
         assertEquals(2, result.size());
     }

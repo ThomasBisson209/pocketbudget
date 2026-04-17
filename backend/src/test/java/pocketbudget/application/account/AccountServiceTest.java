@@ -23,6 +23,8 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AccountServiceTest {
+    private static final String TEST_USER = "testUser";
+
     @Mock
     private AccountRepository accountRepositoryMock;
     @Mock
@@ -42,7 +44,7 @@ class AccountServiceTest {
         dto.type = "SAVINGS";
         dto.initialBalance = 1000.0;
 
-        AccountDto result = accountService.createAccount(dto);
+        AccountDto result = accountService.createAccount(dto, TEST_USER);
 
         verify(accountRepositoryMock).save(any(Account.class));
         assertEquals("My Savings", result.name);
@@ -53,10 +55,10 @@ class AccountServiceTest {
     @Test
     void givenExistingAccountId_whenGetAccount_thenReturnsAccountDto() {
         AccountId id = AccountId.generate();
-        Account account = new Account(id, "Checking", AccountType.CHECKING, 500.0);
+        Account account = new Account(id, "Checking", AccountType.CHECKING, 500.0, TEST_USER);
         when(accountRepositoryMock.findById(id)).thenReturn(Optional.of(account));
 
-        AccountDto result = accountService.getAccount(id.getValue());
+        AccountDto result = accountService.getAccount(id.getValue(), TEST_USER);
 
         assertEquals("Checking", result.name);
         assertEquals(500.0, result.balance);
@@ -66,18 +68,18 @@ class AccountServiceTest {
     void givenUnknownAccountId_whenGetAccount_thenThrowsAccountNotFoundException() {
         when(accountRepositoryMock.findById(any())).thenReturn(Optional.empty());
 
-        assertThrows(AccountNotFoundException.class, () -> accountService.getAccount("unknown-id"));
+        assertThrows(AccountNotFoundException.class, () -> accountService.getAccount("unknown-id", TEST_USER));
     }
 
     @Test
     void givenAccounts_whenGetAllAccounts_thenReturnsDtoList() {
         List<Account> accounts = List.of(
-            new Account(AccountId.generate(), "A1", AccountType.CHECKING, 100.0),
-            new Account(AccountId.generate(), "A2", AccountType.SAVINGS, 200.0)
+            new Account(AccountId.generate(), "A1", AccountType.CHECKING, 100.0, TEST_USER),
+            new Account(AccountId.generate(), "A2", AccountType.SAVINGS, 200.0, TEST_USER)
         );
-        when(accountRepositoryMock.findAll()).thenReturn(accounts);
+        when(accountRepositoryMock.findAllByUserId(TEST_USER)).thenReturn(accounts);
 
-        List<AccountDto> result = accountService.getAllAccounts();
+        List<AccountDto> result = accountService.getAllAccounts(TEST_USER);
 
         assertEquals(2, result.size());
     }
@@ -85,17 +87,18 @@ class AccountServiceTest {
     @Test
     void givenExistingAccount_whenDeleteAccount_thenRepositoryDeleteIsCalled() {
         AccountId id = AccountId.generate();
-        when(accountRepositoryMock.exists(id)).thenReturn(true);
+        Account account = new Account(id, "Checking", AccountType.CHECKING, 500.0, TEST_USER);
+        when(accountRepositoryMock.findById(id)).thenReturn(Optional.of(account));
 
-        accountService.deleteAccount(id.getValue());
+        accountService.deleteAccount(id.getValue(), TEST_USER);
 
         verify(accountRepositoryMock).delete(any(AccountId.class));
     }
 
     @Test
     void givenUnknownAccount_whenDeleteAccount_thenThrowsAccountNotFoundException() {
-        when(accountRepositoryMock.exists(any())).thenReturn(false);
+        when(accountRepositoryMock.findById(any())).thenReturn(Optional.empty());
 
-        assertThrows(AccountNotFoundException.class, () -> accountService.deleteAccount("unknown-id"));
+        assertThrows(AccountNotFoundException.class, () -> accountService.deleteAccount("unknown-id", TEST_USER));
     }
 }

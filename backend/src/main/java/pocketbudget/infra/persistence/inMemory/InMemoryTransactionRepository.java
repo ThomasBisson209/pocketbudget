@@ -28,6 +28,14 @@ public class InMemoryTransactionRepository implements TransactionRepository {
     }
 
     @Override
+    public List<Transaction> findAllByUserId(String userId) {
+        return store.values().stream()
+            .filter(t -> userId.equals(t.getUserId()))
+            .sorted(Comparator.comparing(Transaction::getDate).reversed())
+            .collect(Collectors.toList());
+    }
+
+    @Override
     public List<Transaction> findByAccountId(String accountId) {
         return store.values().stream()
             .filter(t -> t.getAccountId().equals(accountId))
@@ -36,8 +44,25 @@ public class InMemoryTransactionRepository implements TransactionRepository {
     }
 
     @Override
+    public List<Transaction> findByAccountIdAndUserId(String accountId, String userId) {
+        return store.values().stream()
+            .filter(t -> t.getAccountId().equals(accountId) && userId.equals(t.getUserId()))
+            .sorted(Comparator.comparing(Transaction::getDate).reversed())
+            .collect(Collectors.toList());
+    }
+
+    @Override
     public List<Transaction> findRecentN(int n) {
         return store.values().stream()
+            .sorted(Comparator.comparing(Transaction::getDate).reversed())
+            .limit(n)
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Transaction> findRecentNByUserId(int n, String userId) {
+        return store.values().stream()
+            .filter(t -> userId.equals(t.getUserId()))
             .sorted(Comparator.comparing(Transaction::getDate).reversed())
             .limit(n)
             .collect(Collectors.toList());

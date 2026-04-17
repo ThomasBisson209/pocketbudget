@@ -36,11 +36,32 @@ public class HibernateBudgetRepository implements BudgetRepository {
     }
 
     @Override
+    public List<Budget> findAllByUserId(String userId) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery("FROM Budget WHERE userId = :userId", Budget.class)
+                .setParameter("userId", userId)
+                .list();
+        }
+    }
+
+    @Override
     public List<Budget> findByMonthAndYear(int month, int year) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.createQuery("FROM Budget WHERE month = :month AND year = :year", Budget.class)
                 .setParameter("month", month)
                 .setParameter("year", year)
+                .list();
+        }
+    }
+
+    @Override
+    public List<Budget> findByMonthAndYearAndUserId(int month, int year, String userId) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery(
+                "FROM Budget WHERE month = :month AND year = :year AND userId = :userId", Budget.class)
+                .setParameter("month", month)
+                .setParameter("year", year)
+                .setParameter("userId", userId)
                 .list();
         }
     }

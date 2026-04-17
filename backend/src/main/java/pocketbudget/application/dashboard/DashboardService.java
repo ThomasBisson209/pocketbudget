@@ -25,10 +25,10 @@ public class DashboardService {
         this.transactionRepository = transactionRepository;
     }
 
-    public DashboardDto getDashboard(int month, int year) {
-        List<Account> accounts = accountRepository.findAll();
-        List<Budget> budgets = budgetRepository.findByMonthAndYear(month, year);
-        List<Transaction> recent = transactionRepository.findRecentN(5);
+    public DashboardDto getDashboard(int month, int year, String userId) {
+        List<Account> accounts = accountRepository.findAllByUserId(userId);
+        List<Budget> budgets = budgetRepository.findByMonthAndYearAndUserId(month, year, userId);
+        List<Transaction> recent = transactionRepository.findRecentNByUserId(5, userId);
 
         double totalBalance = accounts.stream().mapToDouble(Account::getBalance).sum();
         double totalBudgeted = budgets.stream().mapToDouble(Budget::getMonthlyLimit).sum();

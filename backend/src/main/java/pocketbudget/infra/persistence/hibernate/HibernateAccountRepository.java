@@ -36,6 +36,15 @@ public class HibernateAccountRepository implements AccountRepository {
     }
 
     @Override
+    public List<Account> findAllByUserId(String userId) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery("FROM Account WHERE userId = :userId", Account.class)
+                .setParameter("userId", userId)
+                .list();
+        }
+    }
+
+    @Override
     public void delete(AccountId accountId) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction tx = session.beginTransaction();

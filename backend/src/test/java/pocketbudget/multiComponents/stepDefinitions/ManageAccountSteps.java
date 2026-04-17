@@ -16,6 +16,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ManageAccountSteps {
+    private static final String TEST_USER = "testUser";
+
     private AccountService accountService;
     private AccountDto createdAccount;
     private Exception thrownException;
@@ -37,7 +39,7 @@ public class ManageAccountSteps {
         dto.name = name;
         dto.type = type;
         dto.initialBalance = balance;
-        createdAccount = accountService.createAccount(dto);
+        createdAccount = accountService.createAccount(dto, TEST_USER);
     }
 
     @Alors("le compte {string} devrait exister avec un solde de {double}")
@@ -50,7 +52,7 @@ public class ManageAccountSteps {
     @Quand("je supprime le compte créé")
     public void whenIDeleteTheCreatedAccount() {
         try {
-            accountService.deleteAccount(createdAccount.accountId);
+            accountService.deleteAccount(createdAccount.accountId, TEST_USER);
         } catch (Exception e) {
             thrownException = e;
         }
@@ -59,6 +61,6 @@ public class ManageAccountSteps {
     @Alors("le compte ne devrait plus exister")
     public void thenAccountShouldNotExist() {
         assertThrows(AccountNotFoundException.class,
-            () -> accountService.getAccount(createdAccount.accountId));
+            () -> accountService.getAccount(createdAccount.accountId, TEST_USER));
     }
 }
