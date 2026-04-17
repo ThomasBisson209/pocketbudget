@@ -16,7 +16,7 @@ RUN npm run build
 # ─────────────────────────────────────────────────────────────────────────────
 # Stage 2 — Build the Java backend (fat JAR) with frontend bundled inside
 # ─────────────────────────────────────────────────────────────────────────────
-FROM maven:3.9-eclipse-temurin-21-alpine AS backend
+FROM maven:3.9-eclipse-temurin-17-alpine AS backend
 WORKDIR /app
 
 # Download deps first (cached layer)
@@ -34,7 +34,7 @@ RUN mvn package -DskipTests -q
 # ─────────────────────────────────────────────────────────────────────────────
 # Stage 3 — Minimal runtime image
 # ─────────────────────────────────────────────────────────────────────────────
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
 # Copy the fat JAR produced by maven-shade-plugin
