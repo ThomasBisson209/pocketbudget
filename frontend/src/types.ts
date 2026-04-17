@@ -73,3 +73,23 @@ export interface Dashboard {
   budgetSummaries: BudgetSummary[];
   recentTransactions: RecentTransaction[];
 }
+
+export interface BalanceDataPoint {
+  date: string;
+  balance: number;
+}
+
+export interface BalanceHistory {
+  accountId: string;
+  accountName: string;
+  points: BalanceDataPoint[];
+}
+
+export interface ChangePasswordRequest {
+  oldPassword: string;
+  newPassword: string;
+}
+
+export interface UserProfile {
+  username: string;
+}

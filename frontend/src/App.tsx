@@ -9,16 +9,20 @@ import { DashboardView } from './components/DashboardView';
 import { TransactionList } from './components/TransactionList';
 import { AccountList } from './components/AccountList';
 import { BudgetList } from './components/BudgetList';
+import { ProfilePage } from './components/ProfilePage';
+import { SettingsPage } from './components/SettingsPage';
 
 const queryClient = new QueryClient();
 
-type Tab = 'dashboard' | 'transactions' | 'accounts' | 'budgets';
+type Tab = 'dashboard' | 'transactions' | 'accounts' | 'budgets' | 'profile' | 'settings';
 
 const TAB_LABELS: Record<Tab, string> = {
-  dashboard: 'Tableau de bord',
+  dashboard:    'Tableau de bord',
   transactions: 'Transactions',
-  accounts: 'Comptes',
-  budgets: 'Budgets',
+  accounts:     'Comptes',
+  budgets:      'Budgets',
+  profile:      'Profil',
+  settings:     'Paramètres',
 };
 
 function MainApp() {
@@ -42,7 +46,7 @@ function MainApp() {
         />
       )}
 
-      {/* Sidebar — fixed on mobile, sticky on desktop */}
+      {/* Sidebar */}
       <div className={`fixed inset-y-0 left-0 z-30 h-screen transition-transform duration-200 md:relative md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         <Sidebar
           activeTab={tab}
@@ -72,6 +76,8 @@ function MainApp() {
           {tab === 'transactions' && <TransactionList />}
           {tab === 'accounts'     && <AccountList />}
           {tab === 'budgets'      && <BudgetList />}
+          {tab === 'profile'      && <ProfilePage />}
+          {tab === 'settings'     && <SettingsPage />}
         </div>
       </main>
     </div>

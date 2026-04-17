@@ -5,6 +5,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import pocketbudget.application.account.AccountService;
+import pocketbudget.application.account.dtos.BalanceHistoryDto;
 import pocketbudget.application.account.dtos.CreateAccountDto;
 
 @Path("/accounts")
@@ -41,5 +42,14 @@ public class AccountResource {
     public Response deleteAccount(@PathParam("accountId") String accountId) {
         accountService.deleteAccount(accountId);
         return Response.noContent().build();
+    }
+
+    @GET
+    @Path("/{accountId}/balance-history/month/{month}/year/{year}")
+    public Response getBalanceHistory(
+            @PathParam("accountId") String accountId,
+            @PathParam("month") int month,
+            @PathParam("year") int year) {
+        return Response.ok(accountService.getBalanceHistory(accountId, month, year)).build();
     }
 }

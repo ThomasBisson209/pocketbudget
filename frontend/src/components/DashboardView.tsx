@@ -4,6 +4,7 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recha
 import { TrendingDown, TrendingUp, Wallet, CreditCard } from 'lucide-react';
 import { dashboardApi, accountApi } from '../api';
 import { Badge } from './ui/Badge';
+import { BalanceHistoryChart } from './BalanceHistoryChart';
 
 const CATEGORY_LABELS: Record<string, string> = {
   FOOD: 'Alimentation', TRANSPORT: 'Transport', HOUSING: 'Logement',
@@ -118,6 +119,9 @@ export function DashboardView() {
               )}
             </div>
           </div>
+
+          {/* Balance history chart */}
+          <BalanceHistoryChart />
 
           {/* Recent transactions */}
           {data.recentTransactions.length > 0 && (

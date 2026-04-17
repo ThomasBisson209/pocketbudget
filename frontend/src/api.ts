@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { clearAuth, getToken } from './auth';
-import type { Account, Budget, CreateAccountRequest, CreateBudgetRequest, CreateTransactionRequest, Dashboard, Transaction } from './types';
+import type { Account, BalanceHistory, Budget, ChangePasswordRequest, CreateAccountRequest, CreateBudgetRequest, CreateTransactionRequest, Dashboard, Transaction, UserProfile } from './types';
 
 const http = axios.create({ baseURL: '/api' });
 
@@ -22,6 +22,8 @@ export const accountApi = {
   getAll: () => http.get<Account[]>('/accounts').then(r => r.data),
   create: (data: CreateAccountRequest) => http.post<Account>('/accounts', data).then(r => r.data),
   delete: (id: string) => http.delete(`/accounts/${id}`),
+  getBalanceHistory: (id: string, month: number, year: number) =>
+    http.get<BalanceHistory>(`/accounts/${id}/balance-history/month/${month}/year/${year}`).then(r => r.data),
 };
 
 export const budgetApi = {
@@ -41,4 +43,9 @@ export const transactionApi = {
 export const dashboardApi = {
   get: (month: number, year: number) =>
     http.get<Dashboard>(`/dashboard/month/${month}/year/${year}`).then(r => r.data),
+};
+
+export const userApi = {
+  getProfile: () => http.get<UserProfile>('/users/me').then(r => r.data),
+  changePassword: (data: ChangePasswordRequest) => http.put('/users/me/password', data),
 };

@@ -4,6 +4,7 @@ import jakarta.inject.Inject;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pocketbudget.application.auth.dtos.ChangePasswordDto;
 import pocketbudget.application.auth.dtos.LoginDto;
 import pocketbudget.application.auth.dtos.RegisterDto;
 import pocketbudget.application.auth.dtos.TokenDto;
@@ -50,5 +51,21 @@ public class AuthService {
         }
         log.info("User logged in: {}", dto.username);
         return new TokenDto(jwtService.generateToken(dto.username), dto.username);
+    }
+
+    public void changePassword(String username, ChangePasswordDto dto) {
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> {
+                log.warn("Change password: user not found: {}", username);
+                return new InvalidCredentialsException();
+            });
+        if (!BCrypt.checkpw(dto.oldPassword, user.getHashedPassword())) {
+            log.warn("Change password: invalid old password for user: {}", username);
+            throw new InvalidCredentialsException();
+        }
+        String newHashed = BCrypt.hashpw(dto.newPassword, BCrypt.gensalt());
+        User updated = new User(user.getUserId(), user.getUsername(), newHashed);
+        userRepository.save(updated);
+        log.info("Password changed for user: {}", username);
     }
 }
